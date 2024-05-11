@@ -1,39 +1,8 @@
-import 'package:camera/camera.dart';
+import 'dart:html' as html;
+
 import 'package:flutter/material.dart';
 
-class ChoicePage extends StatefulWidget {
-  @override
-  _ChoicePageState createState() => _ChoicePageState();
-}
-
-class _ChoicePageState extends State<ChoicePage> {
-  late CameraController _controller;
-  late Future<void> _initializeControllerFuture;
-
-  @override
-  void initState() {
-    super.initState();
-
-    // Initialize the camera controller
-    _controller = CameraController(
-      CameraDescription(
-        name: '0',
-        lensDirection: CameraLensDirection.back,
-        sensorOrientation: 0,
-      ),
-      ResolutionPreset.medium,
-    );
-
-    _initializeControllerFuture = _controller.initialize();
-  }
-
-  @override
-  void dispose() {
-    // Dispose of the camera controller when the widget is disposed
-    _controller.dispose();
-    super.dispose();
-  }
-
+class ChoicePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -46,17 +15,36 @@ class _ChoicePageState extends State<ChoicePage> {
           children: [
             ElevatedButton.icon(
               onPressed: () {
-                // Open camera when button is pressed
-                _openCamera();
+                // Navigate to screen to take a photo
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => TakePhotoScreen(),
+                  ),
+                );
               },
               icon: Icon(Icons.camera_alt),
-              label: Text('Open Camera'),
+              label: Text('Take Photo'),
             ),
             SizedBox(height: 20.0),
             ElevatedButton.icon(
               onPressed: () {
-                // Handle selecting from local files
-                // Implement your file selection logic here
+                // Navigate to screen to record a video
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => RecordVideoScreen(),
+                  ),
+                );
+              },
+              icon: Icon(Icons.videocam),
+              label: Text('Record Video'),
+            ),
+            SizedBox(height: 20.0),
+            ElevatedButton.icon(
+              onPressed: () {
+                // Choose a file (image) from local filesystem
+                _pickImageFromFilesystem(context);
               },
               icon: Icon(Icons.folder),
               label: Text('Choose from Local Files'),
@@ -67,46 +55,45 @@ class _ChoicePageState extends State<ChoicePage> {
     );
   }
 
-  Future<void> _openCamera() async {
-    try {
-      await _initializeControllerFuture;
+  void _pickImageFromFilesystem(BuildContext context) {
+    final input = html.FileUploadInputElement()..accept = 'image/*';
+    input.click();
 
-      // Navigate to camera preview screen
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => CameraPreviewScreen(controller: _controller),
-        ),
-      );
-    } catch (e) {
-      print('Error opening camera: $e');
-    }
+    input.onChange.listen((event) {
+      final file = input.files!.first;
+      Navigator.pop(context, file); // Navigate back with selected image file
+    });
   }
 }
 
-class CameraPreviewScreen extends StatelessWidget {
-  final CameraController controller;
-
-  const CameraPreviewScreen({Key? key, required this.controller})
-      : super(key: key);
-
+class TakePhotoScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Camera Preview'),
+        title: Text('Take Photo'),
       ),
-      body: FutureBuilder<void>(
-        future: controller.initialize(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.done) {
-            // If the Future is complete, display the camera preview
-            return CameraPreview(controller);
-          } else {
-            // Otherwise, display a loading indicator
-            return Center(child: CircularProgressIndicator());
-          }
-        },
+      body: Center(
+        child: Text('Screen to take a photo'),
+      ),
+    );
+  }
+}
+
+class RecordVideoScreen extends StatefulWidget {
+  @override
+  _RecordVideoScreenState createState() => _RecordVideoScreenState();
+}
+
+class _RecordVideoScreenState extends State<RecordVideoScreen> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Record Video'),
+      ),
+      body: Center(
+        child: Text('Screen to record a video'),
       ),
     );
   }
