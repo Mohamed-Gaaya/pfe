@@ -55,7 +55,7 @@ class ProfileCard extends StatelessWidget {
       child: Row(
         children: [
           Image.asset(
-            "assets/images/Trace and track.png",
+            "assets/images/Trace and track logo.png",
             height: 38,
           ),
           if (!Responsive.isMobile(context))

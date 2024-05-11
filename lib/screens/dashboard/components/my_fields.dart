@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:pfe/responsive.dart';
 
 import '../../../constants.dart';
+import 'ChoicePage.dart';
 
 class MyFiles extends StatelessWidget {
   const MyFiles({
@@ -24,9 +25,16 @@ class MyFiles extends StatelessWidget {
                       defaultPadding / (Responsive.isMobile(context) ? 2 : 1),
                 ),
               ),
-              onPressed: () {},
               icon: Icon(Icons.add),
               label: Text("Add New"),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ChoicePage(),
+                  ),
+                );
+              },
             ),
           ],
         ),
