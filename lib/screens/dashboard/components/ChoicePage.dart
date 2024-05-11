@@ -1,6 +1,6 @@
-import 'dart:html' show FileUploadInputElement, FileReader;
-import 'dart:io' show File, Platform;
+import 'dart:io';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -18,29 +18,15 @@ class ChoicePage extends StatelessWidget {
         print('Image selection canceled.');
       }
     } else {
-      // For web, use file input element to pick files
-      final input = FileUploadInputElement()..accept = 'image/*';
-      input.click();
+      // For web, show a custom file picker dialog
+      final input = await FilePicker.platform.pickFiles(type: FileType.image);
 
-      input.onChange.listen((e) {
-        final files = input.files;
-        if (files?.length == 1) {
-          final file = files?[0];
-          final reader = FileReader();
-
-          reader.onLoadEnd.listen((e) {
-            // Handle the selected image file here
-            final result = reader.result;
-            if (result is String) {
-              // Create a blob URL for the selected file
-              final blob = File([result] as String);
-              Navigator.pop(context, blob);
-            }
-          });
-
-          reader.readAsDataUrl(file!);
-        }
-      });
+      if (input != null && input.files.isNotEmpty) {
+        final file = File(input.files.single.path!);
+        Navigator.pop(context, file);
+      } else {
+        print('Image selection canceled.');
+      }
     }
   }
 
@@ -56,18 +42,12 @@ class ChoicePage extends StatelessWidget {
           children: [
             ElevatedButton.icon(
               onPressed: () {
-                if (!kIsWeb) {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => TakePhotoScreen(),
-                    ),
-                  );
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                    content: Text('Camera is not supported on web.'),
-                  ));
-                }
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => TakePhotoScreen(),
+                  ),
+                );
               },
               icon: Icon(Icons.camera_alt),
               label: Text('Take Photo'),
@@ -75,18 +55,12 @@ class ChoicePage extends StatelessWidget {
             SizedBox(height: 20.0),
             ElevatedButton.icon(
               onPressed: () {
-                if (!kIsWeb) {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => RecordVideoScreen(),
-                    ),
-                  );
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                    content: Text('Recording video is not supported on web.'),
-                  ));
-                }
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => RecordVideoScreen(),
+                  ),
+                );
               },
               icon: Icon(Icons.videocam),
               label: Text('Record Video'),
