@@ -1,8 +1,49 @@
-import 'dart:html' as html;
+import 'dart:html' show FileUploadInputElement, FileReader;
+import 'dart:io' show File, Platform;
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 class ChoicePage extends StatelessWidget {
+  Future<void> _pickImage(BuildContext context) async {
+    if (!kIsWeb) {
+      final picker = ImagePicker();
+      final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+      if (pickedFile != null) {
+        // Handle the selected image file here
+        Navigator.pop(context, File(pickedFile.path));
+      } else {
+        print('Image selection canceled.');
+      }
+    } else {
+      // For web, use file input element to pick files
+      final input = FileUploadInputElement()..accept = 'image/*';
+      input.click();
+
+      input.onChange.listen((e) {
+        final files = input.files;
+        if (files?.length == 1) {
+          final file = files?[0];
+          final reader = FileReader();
+
+          reader.onLoadEnd.listen((e) {
+            // Handle the selected image file here
+            final result = reader.result;
+            if (result is String) {
+              // Create a blob URL for the selected file
+              final blob = File([result] as String);
+              Navigator.pop(context, blob);
+            }
+          });
+
+          reader.readAsDataUrl(file!);
+        }
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -15,13 +56,18 @@ class ChoicePage extends StatelessWidget {
           children: [
             ElevatedButton.icon(
               onPressed: () {
-                // Navigate to screen to take a photo
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => TakePhotoScreen(),
-                  ),
-                );
+                if (!kIsWeb) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => TakePhotoScreen(),
+                    ),
+                  );
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    content: Text('Camera is not supported on web.'),
+                  ));
+                }
               },
               icon: Icon(Icons.camera_alt),
               label: Text('Take Photo'),
@@ -29,13 +75,18 @@ class ChoicePage extends StatelessWidget {
             SizedBox(height: 20.0),
             ElevatedButton.icon(
               onPressed: () {
-                // Navigate to screen to record a video
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => RecordVideoScreen(),
-                  ),
-                );
+                if (!kIsWeb) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => RecordVideoScreen(),
+                    ),
+                  );
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    content: Text('Recording video is not supported on web.'),
+                  ));
+                }
               },
               icon: Icon(Icons.videocam),
               label: Text('Record Video'),
@@ -43,8 +94,7 @@ class ChoicePage extends StatelessWidget {
             SizedBox(height: 20.0),
             ElevatedButton.icon(
               onPressed: () {
-                // Choose a file (image) from local filesystem
-                _pickImageFromFilesystem(context);
+                _pickImage(context);
               },
               icon: Icon(Icons.folder),
               label: Text('Choose from Local Files'),
@@ -53,16 +103,6 @@ class ChoicePage extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  void _pickImageFromFilesystem(BuildContext context) {
-    final input = html.FileUploadInputElement()..accept = 'image/*';
-    input.click();
-
-    input.onChange.listen((event) {
-      final file = input.files!.first;
-      Navigator.pop(context, file); // Navigate back with selected image file
-    });
   }
 }
 
@@ -80,12 +120,7 @@ class TakePhotoScreen extends StatelessWidget {
   }
 }
 
-class RecordVideoScreen extends StatefulWidget {
-  @override
-  _RecordVideoScreenState createState() => _RecordVideoScreenState();
-}
-
-class _RecordVideoScreenState extends State<RecordVideoScreen> {
+class RecordVideoScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
