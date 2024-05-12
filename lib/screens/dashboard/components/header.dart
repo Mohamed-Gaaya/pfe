@@ -41,6 +41,8 @@ class ProfileCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    String? selectedOption;
+    final List<String> options = ['Edit Profile', 'Settings', 'Logout'];
     return Container(
       margin: EdgeInsets.only(left: defaultPadding),
       padding: EdgeInsets.symmetric(
@@ -64,11 +66,118 @@ class ProfileCard extends StatelessWidget {
                   const EdgeInsets.symmetric(horizontal: defaultPadding / 2),
               child: Text("Zyadi Azzedine"),
             ),
-          Icon(Icons.keyboard_arrow_down),
+          DropdownButton(
+            icon: Icon(Icons.keyboard_arrow_down),
+            underline: SizedBox(), // Removes the underline
+            onChanged: (String? newValue) {
+              setState(() {
+                selectedOption = newValue;
+                // Implement logic based on selected option here
+                if (newValue == 'Edit Profile') {
+                  // Handle edit profile action
+                  print('Edit Profile selected');
+                } else if (newValue == 'Settings') {
+                  // Handle settings action
+                  print('Settings selected');
+                } else if (newValue == 'Logout') {
+                  // Handle logout action
+                  print('Logout selected');
+                }
+              });
+            },
+            value: selectedOption,
+            items: options.map((String option) {
+              return DropdownMenuItem(
+                value: option,
+                child: Row(
+                  children: [
+                    if (option == 'Edit Profile') Icon(Icons.person),
+                    if (option == 'Settings') Icon(Icons.settings),
+                    if (option == 'Logout') Icon(Icons.exit_to_app),
+                    SizedBox(width: 10),
+                    Text(option),
+                  ],
+                ),
+              );
+            }).toList(),
+          ),
         ],
       ),
     );
   }
+
+  void setState(Null Function() param0) {}
+}
+
+@override
+Widget build(BuildContext context) {
+  return GestureDetector(
+    onTap: () {
+      // Handle tapping the profile (can be the same as clicking the dropdown)
+      _showDropdown(context);
+    },
+    child: Container(
+      margin: EdgeInsets.only(left: defaultPadding),
+      padding: EdgeInsets.symmetric(
+        horizontal: defaultPadding,
+        vertical: defaultPadding / 2,
+      ),
+      decoration: BoxDecoration(
+        color: secondaryColor,
+        borderRadius: const BorderRadius.all(Radius.circular(10)),
+        border: Border.all(color: Colors.white10),
+      ),
+      child: Row(
+        children: [
+          Image.asset(
+            "assets/images/Trace and track logo.png",
+            height: 38,
+          ),
+          SizedBox(width: 8), // Add a small fixed width space
+          Text(
+            "Zyadi Azzedine",
+            style: TextStyle(fontSize: 16), // Adjust font size as needed
+          ),
+          Icon(Icons.keyboard_arrow_down), // Dropdown icon
+        ],
+      ),
+    ),
+  );
+}
+
+void _showDropdown(BuildContext context) {
+  // Handle showing the dropdown menu
+  final List<String> options = ['Edit Profile', 'Settings', 'Logout'];
+  showModalBottomSheet(
+    context: context,
+    builder: (BuildContext context) {
+      return Container(
+        color: Colors.white,
+        child: ListView(
+          shrinkWrap: true,
+          children: options.map((String option) {
+            return ListTile(
+              title: Text(option),
+              onTap: () {
+                // Handle selecting an option from the dropdown
+                if (option == 'Edit Profile') {
+                  // Handle edit profile action
+                  print('Edit Profile selected');
+                } else if (option == 'Settings') {
+                  // Handle settings action
+                  print('Settings selected');
+                } else if (option == 'Logout') {
+                  // Handle logout action
+                  print('Logout selected');
+                }
+                Navigator.pop(context); // Close the bottom sheet
+              },
+            );
+          }).toList(),
+        ),
+      );
+    },
+  );
 }
 
 class SearchField extends StatelessWidget {
@@ -88,7 +197,9 @@ class SearchField extends StatelessWidget {
           borderRadius: const BorderRadius.all(Radius.circular(10)),
         ),
         suffixIcon: InkWell(
-          onTap: () {},
+          onTap: () {
+            // Handle search action here
+          },
           child: Container(
             padding: EdgeInsets.all(defaultPadding * 0.75),
             margin: EdgeInsets.symmetric(horizontal: defaultPadding / 2),
